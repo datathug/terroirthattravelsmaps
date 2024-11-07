@@ -47,8 +47,8 @@ async function addToMapFromGeoJSON(id, data, color, color_hover) {
 			'fill-opacity':  [
 				'case',
 				['boolean', ['feature-state', 'hover'], false],
-				1,
-				0.5
+				0.84,
+				0.7
 			]
 		}
 	});
@@ -62,7 +62,7 @@ async function loadGeoJSONs() {
 		.then(response => response.json())
 		.then(data => {
 			appData.origins = data.features;
-			addToMapFromGeoJSON('ORIGINS', data, '#4c833f', '#07ef00').then( () => {
+			addToMapFromGeoJSON('ORIGINS', data, '#53c138', '#07ef00').then( () => {
 					console.log(`Loaded ${data.features.length} items to layer "ORIGINS"`)
 				}
 			);
@@ -84,7 +84,7 @@ async function loadGeoJSONs() {
 		.then(response => response.json())
 		.then(data => {
 			appData.destinations = data.features;
-			addToMapFromGeoJSON('DESTINATIONS', data, '#d67474', '#ff0000').then( () => {
+			addToMapFromGeoJSON('DESTINATIONS', data, '#ea3838', '#ff0000').then( () => {
 				console.log(`Loaded ${data.features.length} items to layer "DESTINATIONS"`)
 				}
 			);
@@ -96,7 +96,8 @@ map = new mapboxgl.Map({
 	container: 'map', // container ID
 	style: MAPSTYLE_URL_REF, // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
 	center: [10, 46], // starting position
-	zoom: 4.01 // starting zoom
+	zoom: 4.01, // starting zoom,
+	projection: 'mercator'
 });
 
 
@@ -383,7 +384,7 @@ map.on('mousemove', 'ORIGINS', (e) => {
 			<p>Code ${props['unit_id']} <b>${props['Country']}</b></p>`;
 
 		if (appData.originPopup === null) {
-			appData.originPopup = new mapboxgl.Popup({closeOnClick: true})
+			appData.originPopup = new mapboxgl.Popup({closeOnClick: false})
 				.setLngLat(e.lngLat)
 				.setHTML(popupHtml)
 				.addTo(map);
@@ -425,6 +426,7 @@ map.on('mousemove', 'DESTINATIONS', (e) => {
 			{ source: 'DESTINATIONS', id: appData.hoveredDestination },
 			{ hover: true }
 		);
+
 		map.getCanvas().style.cursor = 'pointer';
 
 	}
