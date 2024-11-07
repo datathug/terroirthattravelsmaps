@@ -442,7 +442,6 @@ map.on('mouseleave', 'DESTINATIONS', () => {
 	}
 	appData.hoveredDestination = null;
 	map.getCanvas().style.cursor = '';
-	const _ = 1;
 
 });
 
