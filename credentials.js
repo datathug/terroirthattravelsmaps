@@ -1,0 +1,1 @@
+const mapboxAccessToken = "pk.eyJ1IjoiZXVnZW5la3BnaW1hcHBpbmciLCJhIjoiY20zNTdrbDY5MDZrZzJtcjE4dDJtdDY4MiJ9.b9uSi8caYpjK9gXDDVgIQg";

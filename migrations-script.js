@@ -1,5 +1,4 @@
 
-mapboxgl.accessToken = "pk.eyJ1IjoiZXVnZW5la3BnaW1hcHBpbmciLCJhIjoiY20zNTdrbDY5MDZrZzJtcjE4dDJtdDY4MiJ9.b9uSi8caYpjK9gXDDVgIQg";
 let map;
 
 // const MAPSTYLE_URL_REF = "mapbox://styles/eugenekpgimapping/cm358blab002o01nw5r7v97ri";
@@ -91,7 +90,7 @@ async function loadGeoJSONs() {
 		});
 }
 
-
+mapboxgl.accessToken = mapboxAccessToken;
 map = new mapboxgl.Map({
 	container: 'map', // container ID
 	style: MAPSTYLE_URL_REF, // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
