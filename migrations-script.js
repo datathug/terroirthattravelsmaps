@@ -214,7 +214,7 @@ async function onOriginUnitClicked(id_or_feature) {
 		if (e.tagName !== 'A') {
 			continue;
 		}
-		e.className = (e.id == appData.currentOrigFeature.id) ? 'active':  '';
+		e.className = (e.id == appData.currentOrigFeature.id) ? 'selected':  '';
 	}
 
 	if (!appData.mapping.hasOwnProperty(appData.currentOrigFeature.id)) {
@@ -361,8 +361,11 @@ function generateArc(start, end, segments) {
 
 // hover effects
 map.on('mousemove', 'ORIGINS', (e) => {
-	if (e.features.length > 0) {
-		if (appData.hoveredOrigin !== null) {
+
+	// avoid running when no feature or same feature
+	if (e.features.length === 0 || hoveredFeatureId === e.features[0].id) return;
+
+	if (appData.hoveredOrigin !== null) {
 			map.setFeatureState(
 				{ source: 'ORIGINS', id: appData.hoveredOrigin },
 				{ hover: false }
@@ -392,7 +395,6 @@ map.on('mousemove', 'ORIGINS', (e) => {
 				.setHTML(popupHtml).addTo(map);
 		}
 		map.getCanvas().style.cursor = 'pointer';
-	}
 });
 
 
@@ -441,6 +443,24 @@ map.on('mouseleave', 'DESTINATIONS', () => {
 	}
 	appData.hoveredDestination = null;
 	map.getCanvas().style.cursor = '';
-
 });
 
+// put callbacks on buttons: Left
+document.getElementById('arrow-left').onclick = () => {
+	if (appData.currentOrigFeature !== null && appData.currentDestinationIndex !== null) {
+		console.log(`Button left clicked`);
+		zoomToPrevDest();
+	} else {
+		console.log(`Button left clicked, no action possible`);
+	}
+}
+
+// put callbacks on buttons: Right
+document.getElementById('arrow-right').onclick = () => {
+	if (appData.currentOrigFeature !== null && appData.currentDestinationIndex !== null) {
+		console.log(`Button right clicked`);
+		zoomToNextDest();
+	} else {
+		console.log(`Button right clicked, no action possible`);
+	}
+}

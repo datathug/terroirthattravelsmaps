@@ -13,7 +13,32 @@ map.on('style.load', setupMapFunctionality);
 
 const pgiSourceId = "pgi_pdo_Nov_5-7166c9";
 const pgiLayerId = 'PGI-PDO-NoWine';
-let hoveredFeatureId;
+const infoWindow = document.getElementById('infoWindow');
+let hoveredFeatureId, feat;
+
+const TARGET_INFO_FIELDS = [
+	"unit_id",
+	"Status",
+	// "ApplType",
+	"Country",
+	"CATEGORY_OLD",
+	// "Name",
+	"ProductType",
+	"CODE",
+];
+
+// takes feature properties as input and produces HTML content for info window
+function makeFeatureInfoHtml(props) {
+	// update info window
+	// let info = `<h3>${props['Name']}, ${props['Country']}</h3>`;
+	let info = `<h3>${props['Name'].split('/')[0].trim()}, ${props['Country']}</h3>`;
+	// infoWindow.innerHTML = `<h3>${props['Name']}</h3>`;
+
+	TARGET_INFO_FIELDS.forEach((field) => {
+		info = info + `<p>${props[field]}</p>`;
+	});
+	return info;
+}
 
 
 function setupMapFunctionality() {
@@ -36,8 +61,8 @@ function setupMapFunctionality() {
 		// const quakeLocation = event.features[0].properties.place;
 		// const quakeDate = new Date(event.features[0].properties.time);
 
-		// Check whether features exist
-		if (e.features.length === 0) return;
+		// avoid running when no feature or same feature
+		if (e.features.length === 0 || hoveredFeatureId === e.features[0].id) return;
 
 		if (hoveredFeatureId) map.setFeatureState(
 			{
@@ -49,7 +74,9 @@ function setupMapFunctionality() {
 				hover: false
 		});
 
-		hoveredFeatureId = e.features[0].id;
+		hoveredFeatureId = e.features[0].id; // update current focus feature
+		feat = e.features[0]
+		infoWindow.innerHTML = makeFeatureInfoHtml(e.features[0].properties);
 
 		map.setFeatureState(
 			{
@@ -61,6 +88,8 @@ function setupMapFunctionality() {
 				hover: true
 			}
 		);
+
+
 	});
 
 // define behavior on leave
