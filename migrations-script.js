@@ -1,4 +1,3 @@
-
 let map;
 
 // const MAPSTYLE_URL_REF = "mapbox://styles/eugenekpgimapping/cm358blab002o01nw5r7v97ri";
@@ -18,10 +17,20 @@ const appData = {
 	currentOrigFeature: null,	// Feature
 	currentDestinationIndex: null,	// index in mapping array
 
-	hoveredOrigin: null,
-	hoveredDestination: null,
+	hoveredOrigin: null,	// feature id
+	hoveredDestination: null,	// feature id
 	originPopup: null,
 };
+
+
+const infoWindow = document.getElementById('infoWindow');
+
+// factory function, takes feature properties as input and produces HTML content for info window
+function makeMigrationInfoHtml(feature) {
+	const desc = descriptions[feature.id] ? descriptions[feature.id] : '<span>No details available</span>';
+	return `<h3>${feature.properties['Name']}</h3>` + desc;
+}
+
 
 async function addToMapFromGeoJSON(id, data, color, color_hover) {
 
@@ -131,8 +140,7 @@ function zoomToCurrentDest() {
 		console.log(`Current Dest Index ${idx}`)
 		const lonLat = appData.destinations[idx].properties.centroid.split(",").map((i) => parseFloat(i));
 
-
-
+		// fly over the map
 		flyToLonLat(lonLat);
 
 	} else {
@@ -203,13 +211,14 @@ function zoomToOrigin() {
 // 	state.hoveredPolygonId = null;
 // });
 
-async function onOriginUnitClicked(id_or_feature) {
+function onOriginUnitClicked(id_or_feature) {
 	if (typeof id_or_feature !== 'object') {
 		appData.currentOrigFeature = appData.origins[parseInt(id_or_feature) - 1]
 	} else {
 		appData.currentOrigFeature = id_or_feature;
 	}
 
+	// update menu state
 	for (const e of document.getElementById('menu').children) {
 		if (e.tagName !== 'A') {
 			continue;
@@ -217,14 +226,19 @@ async function onOriginUnitClicked(id_or_feature) {
 		e.className = (e.id == appData.currentOrigFeature.id) ? 'selected':  '';
 	}
 
+	// update info window text
+	infoWindow.innerHTML = makeMigrationInfoHtml(appData.currentOrigFeature);
+
+	// find destinations in mapping or throw error
 	if (!appData.mapping.hasOwnProperty(appData.currentOrigFeature.id)) {
 		// break if no values
-		console.log(`No destinations mapped to ID=${appData.currentOrigFeature.id}`);
+		const msg = `Failed to switch focus for origin ID=${appData.currentOrigFeature.id}, no destinations mapped.`;
 		appData.currentOrigFeature = null;
+		throw new Error(msg);
 	} else {
 		// proceed if destinations available
 		appData.currentDestinationIndex = 0;
-		zoomToCurrentDest();
+		zoomToCurrentDest();	// fly over the map
 
 }
 	}
@@ -239,8 +253,16 @@ map.on('click', 'ORIGINS', (e) => {
 
 	// set new state
 
-	onOriginUnitClicked(e.features[0]);
-	document.getElementById(appData.currentOrigFeature.id).click();
+	if (e.features[0]) {
+		onOriginUnitClicked(e.features[0].id);	// only updates current focus feature ID data
+		if (appData.currentOrigFeature) {
+			document.getElementById(appData.currentOrigFeature.id).click()
+		} else {
+			console.error(`Failed to switch focus to Origin ID=${e.features[0].id} ${e.features[0].properties['Name']}`);
+		}
+	} else {
+		console.error("Click on feature detected but no feature received.");
+	}
 
 	// e.stopPropagation();
 });
@@ -305,7 +327,7 @@ function makeMenu() {
 			// 	e.className = (e.id === this.id) ? 'active':  '';
 			// }
 
-			onOriginUnitClicked(clickedUnitId);
+			onOriginUnitClicked(clickedUnitId);	// only updates current focus feature ID
 
 			// console.log('Changed focus PGI/PDO');
 			};
@@ -363,7 +385,7 @@ function generateArc(start, end, segments) {
 map.on('mousemove', 'ORIGINS', (e) => {
 
 	// avoid running when no feature or same feature
-	if (e.features.length === 0 || hoveredFeatureId === e.features[0].id) return;
+	if (e.features.length === 0 || appData.hoveredOrigin === e.features[0].id) return;
 
 	if (appData.hoveredOrigin !== null) {
 			map.setFeatureState(

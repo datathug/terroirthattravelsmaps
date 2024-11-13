@@ -13,7 +13,6 @@ map.on('style.load', setupMapFunctionality);
 
 const pgiSourceId = "pgi_pdo_Nov_5-7166c9";
 const pgiLayerId = 'PGI-PDO-NoWine';
-const infoWindow = document.getElementById('infoWindow');
 let hoveredFeatureId, feat;
 
 const TARGET_INFO_FIELDS = [
@@ -26,6 +25,8 @@ const TARGET_INFO_FIELDS = [
 	"ProductType",
 	"CODE",
 ];
+
+const infoWindow = document.getElementById('infoWindow');
 
 // takes feature properties as input and produces HTML content for info window
 function makeFeatureInfoHtml(props) {

@@ -9,10 +9,15 @@
 	<script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
 	<link href="mapp.css" rel="stylesheet">
 	<script src="credentials.js"></script>
+	<script src="descriptions.js"></script>
 </head>
 <body>
 <nav id="menu"></nav>
 <div id="map"></div>
+<div class="info-window" id="infoWindow">
+	<h3>Climatic migration info window.</h3>
+	<p id="infoText">Click on green areas of PGI & PDO for details. </p>
+</div>
 <div class="arrow-container">
 	<button class="arrow-button" id="arrow-left"> ⬅ </button>
 	<button class="arrow-button" id="arrow-right"> ➡ </button>
