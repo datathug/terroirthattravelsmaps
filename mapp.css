@@ -104,12 +104,13 @@ body {
 }
 
 .arrow-button {
-    font-size: 60px;
+    font-size: 24px;
+    font-weight: 600;
     line-height: 0.8;
     color: #cccdcf;
     background-color: #19376a;
     border: none;
-    padding: 0 22px 9px 22px;
+    padding: 5px 22px 5px 22px;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;

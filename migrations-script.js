@@ -1,10 +1,12 @@
 let map;
 
 // const MAPSTYLE_URL_REF = "mapbox://styles/eugenekpgimapping/cm358blab002o01nw5r7v97ri";
-const MAPSTYLE_URL_REF = 'mapbox://styles/mapbox/dark-v11';
+// const MAPSTYLE_URL_REF = 'mapbox://styles/mapbox/dark-v11';
 
-const pgiLayerId = 'pgi-pdo-nov-5-7166c9';
-const pgiSourceId = "pgi_pdo_Nov_5-7166c9";
+const styleUrl = 'mapbox://styles/mapbox/light-v11';
+// const pgiLayerId = 'pgi-pdo-nov-5-7166c9';
+// const pgiSourceId = "pgi_pdo_Nov_5-7166c9";
+
 const ORIGINS_GEOJSON = "./origins.geojson";
 const DESTINATIONS_GEOJSON = "./destinations.geojson";
 
@@ -20,6 +22,8 @@ const appData = {
 	hoveredOrigin: null,	// feature id
 	hoveredDestination: null,	// feature id
 	originPopup: null,
+
+	bottomSymbolLayerId: null
 };
 
 
@@ -33,6 +37,17 @@ function makeMigrationInfoHtml(feature) {
 
 
 async function addToMapFromGeoJSON(id, data, color, color_hover) {
+
+	if (!appData.bottomSymbolLayerId) {
+		const layers = map.getStyle().layers;
+		// Find the index of the first symbol layer in the map style.
+		for (const lyr of layers) {
+			if (lyr.type === 'symbol') {
+				appData.bottomSymbolLayerId = lyr.id;
+				break;
+			}
+		}
+	}
 
 	map.addSource(id, {
 		'type': 'geojson',
@@ -59,7 +74,7 @@ async function addToMapFromGeoJSON(id, data, color, color_hover) {
 				0.7
 			]
 		}
-	});
+	}, appData.bottomSymbolLayerId);
 
 }
 
@@ -70,7 +85,7 @@ async function loadGeoJSONs() {
 		.then(response => response.json())
 		.then(data => {
 			appData.origins = data.features;
-			addToMapFromGeoJSON('ORIGINS', data, '#53c138', '#07ef00').then( () => {
+			addToMapFromGeoJSON('ORIGINS', data, '#245917', '#38aa38').then( () => {
 					console.log(`Loaded ${data.features.length} items to layer "ORIGINS"`)
 				}
 			);
@@ -92,7 +107,7 @@ async function loadGeoJSONs() {
 		.then(response => response.json())
 		.then(data => {
 			appData.destinations = data.features;
-			addToMapFromGeoJSON('DESTINATIONS', data, '#ea3838', '#ff0000').then( () => {
+			addToMapFromGeoJSON('DESTINATIONS', data, '#9a2121', '#e43e3e').then( () => {
 				console.log(`Loaded ${data.features.length} items to layer "DESTINATIONS"`)
 				}
 			);
@@ -102,7 +117,7 @@ async function loadGeoJSONs() {
 mapboxgl.accessToken = mapboxAccessToken;
 map = new mapboxgl.Map({
 	container: 'map', // container ID
-	style: MAPSTYLE_URL_REF, // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+	style: styleUrl, // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
 	center: [10, 46], // starting position
 	zoom: 4.01, // starting zoom,
 	projection: 'mercator'
@@ -484,5 +499,14 @@ document.getElementById('arrow-right').onclick = () => {
 		zoomToNextDest();
 	} else {
 		console.log(`Button right clicked, no action possible`);
+	}
+}
+
+document.getElementById('origin-button').onclick = () => {
+	if (appData.currentOrigFeature !== null && appData.currentDestinationIndex !== null) {
+		console.log(`Origin button clicked`);
+		zoomToOrigin();
+	} else {
+		console.log(`Origin button clicked, no action possible`);
 	}
 }
