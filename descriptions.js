@@ -2,7 +2,7 @@ var descriptions = {
 
 	// key is FeatureID, starts with 1
 	// Carne Marinhoa
-	2: `<p>Vegetation type: <b>Temperate</b></p>
+	1: `<p>Vegetation type: <b>Temperate</b></p>
 <p><b>Broadleaf and Mixed Forests</b></p>
 
 <p>For high emissions, summers in are expected to be 3.7°C (6.6°F) warmer and
@@ -11,7 +11,7 @@ var descriptions = {
 found in Valenca, Portugal(2) or Funchal, Portugal(1)</p>`,
 
 	// Ail
-	3: `<p>Vegetation type: <b>Temperate</b></p>
+	2: `<p>Vegetation type: <b>Temperate</b></p>
 <p><b>Broadleaf and Mixed Forests</b></p>
 <p>For high emissions, summers are expected to be 4.9°C (8.8°F) warmer and
 14.7% drier. Winters are expected to be 4.4°C (8°F) warmer and 15% wetter.</p>
@@ -19,7 +19,7 @@ found in Valenca, Portugal(2) or Funchal, Portugal(1)</p>`,
 be found in Oldenburg, Germany.</p>`,
 
 	// Druif
-	4: `<p>Vegetation type: <b>Temperate</b></p>
+	3: `<p>Vegetation type: <b>Temperate</b></p>
 <p><b>Broadleaf and Mixed Forests</b></p>
 
 <p>For high emissions, summers are expected to be 5.1°C (9.1°F) warmer and
