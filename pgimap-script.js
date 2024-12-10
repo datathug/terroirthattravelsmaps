@@ -15,6 +15,12 @@ const pgiSourceId = "pgi_pdo_Nov_5-7166c9";
 const pgiLayerId = 'PGI-PDO-NoWine';
 let hoveredFeatureId, feat;
 
+const UNITS_OF_INTEREST = [
+	"PDO-PT-0233",
+	"PGI-FR-0193",
+	"PGI-NL-0215",
+];
+
 const TARGET_INFO_FIELDS = [
 	"unit_id",
 	"Status",
@@ -52,6 +58,16 @@ function setupMapFunctionality() {
 		'#6e0707',
 		'rgba(255,255,255,0)'
 	]);
+
+	map.setLayoutProperty(
+		pgiLayerId,
+		'fill-sort-key',
+		[
+			"to-number",
+			["in", ["get", "unit_id"], ["literal", UNITS_OF_INTEREST]],
+			0
+		]
+	)
 
 
 	map.on('mousemove', pgiLayerId, (e) => {
