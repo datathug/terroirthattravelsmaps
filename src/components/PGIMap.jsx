@@ -40,12 +40,17 @@ function getFeatureBounds(feature) {
 export default function PGIMap() {
   const mapRef = useRef(null);
   const hoveredIdRef = useRef(null);
+  const originalFilterRef = useRef(null);
   const [hoveredProps, setHoveredProps] = useState(null);
   const [cursor, setCursor] = useState('auto');
   const [searchFeatures, setSearchFeatures] = useState([]);
 
   const onMapLoad = useCallback(() => {
     const map = mapRef.current.getMap();
+
+    // Snapshot the style's original filter (e.g. the NoWine exclusion) so we
+    // can restore it exactly when the category filter is cleared.
+    originalFilterRef.current = map.getFilter(PGI_LAYER_ID) ?? null;
 
     // Highlight hovered feature outline in dark red
     map.setPaintProperty(PGI_LAYER_ID, 'fill-outline-color', [
@@ -136,6 +141,22 @@ export default function PGIMap() {
     }
   }, []);
 
+  // Called by CategoryFilter on select / clear.
+  // Uses ['in', chapter, ['get', 'CODE']] as a substring match — valid because
+  // the selected chapter heading is always a literal substring of any feature
+  // whose CODE belongs to that chapter.
+  // The original style filter (e.g. NoWine exclusion) is preserved with ['all'].
+  const handleCategorySelect = useCallback((chapter) => {
+    const map = mapRef.current.getMap();
+    const base = originalFilterRef.current;
+    if (chapter) {
+      const f = ['in', chapter, ['get', 'CODE']];
+      map.setFilter(PGI_LAYER_ID, base ? ['all', base, f] : f);
+    } else {
+      map.setFilter(PGI_LAYER_ID, base);
+    }
+  }, []);
+
   const onMouseLeave = useCallback(() => {
     const map = mapRef.current.getMap();
 
@@ -170,7 +191,7 @@ export default function PGIMap() {
       />
       <div className="map-controls">
         <SearchBox features={searchFeatures} onSelect={handleFeatureSelect} />
-        <CategoryFilter features={searchFeatures} />
+        <CategoryFilter features={searchFeatures} onCategoryChange={handleCategorySelect} />
       </div>
       <InfoWindow properties={hoveredProps} />
     </>

@@ -20,7 +20,7 @@ const extractChapters = (code) => {
     .filter(l => /^\d{2} - /.test(l));
 };
 
-export default function CategoryFilter({ features }) {
+export default function CategoryFilter({ features, onCategoryChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const [codes, setCodes] = useState([]);
@@ -53,11 +53,13 @@ export default function CategoryFilter({ features }) {
   const handleSelect = (code) => {
     setSelected(code);
     setIsOpen(false);
+    onCategoryChange?.(code);
   };
 
   const handleClear = () => {
     setSelected(null);
     setIsOpen(false);
+    onCategoryChange?.(null);
   };
 
   return (
