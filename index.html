@@ -1,21 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="utf-8">
-	<title>PGI & PDO across EU27 countries as of 2024 geolocated using OpenAI ChatGPT and Google Geocode API</title>
-	<link rel="icon" type="image/x-icon" href="favicon.ico">
-	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-	<link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet">
-	<script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
-	<link href="mapp.css" rel="stylesheet">
-	<script src="credentials.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>PGI &amp; PDO across EU27 countries as of 2024</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 </head>
 <body>
-<div id="map"></div>
-<div class="info-window" id="infoWindow">
-	<h3>PGI / PDO Info Window</h3>
-	<p id="infoText">Click on a PGI or PDO area for details. </p>
-</div>
-<script src="pgimap-script.js"></script>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

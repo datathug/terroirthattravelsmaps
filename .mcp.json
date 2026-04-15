@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "description": "Fetches up-to-date library documentation for React, Mapbox GL JS, react-map-gl, and Turf.js"
+    }
+  }
+}
