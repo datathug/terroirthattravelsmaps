@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [master]
+    branches: [master, dev]
 
 jobs:
   deploy:
@@ -13,10 +13,21 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      - name: Set base path
+        run: |
+          if [ "${{ github.ref_name }}" = "dev" ]; then
+            echo "BASE_PATH=/terroirthattravelsmaps/dev/" >> $GITHUB_ENV
+            echo "DEST_DIR=dev" >> $GITHUB_ENV
+          else
+            echo "BASE_PATH=/terroirthattravelsmaps/" >> $GITHUB_ENV
+            echo "DEST_DIR=." >> $GITHUB_ENV
+          fi
       - run: npm run build
         env:
           VITE_MAPBOX_TOKEN: ${{ secrets.VITE_MAPBOX_TOKEN }}
+          VITE_BASE_PATH: ${{ env.BASE_PATH }}
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
+          destination_dir: ${{ env.DEST_DIR }}
