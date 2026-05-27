@@ -67,7 +67,9 @@ body {
   border-radius: 10px;
   border: 1.5px solid transparent;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .search-input-wrapper:focus-within {
@@ -185,7 +187,9 @@ body {
   font-size: 14px;
   color: #1f2937;
   text-align: left;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .filter-button:hover {
@@ -289,7 +293,9 @@ body {
   font-size: 12px;
   color: #6b7280;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
 }
 
 .filter-clear-btn:hover {

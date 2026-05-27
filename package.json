@@ -6,7 +6,11 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "VITE_BASE_PATH=/terroirthattravelsmaps/dev2/ vite build && gh-pages -d dist -e dev2"
+    "deploy": "VITE_BASE_PATH=/terroirthattravelsmaps/dev2/ vite build && gh-pages -d dist -e dev2",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check .",
+    "fix": "biome check --write ."
   },
   "dependencies": {
     "mapbox-gl": "^3.7.0",
@@ -15,6 +19,7 @@
     "react-map-gl": "^7.1.7"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.16",
     "@vitejs/plugin-react": "^4.3.4",
     "gh-pages": "^6.3.0",
     "vite": "^6.0.0"
