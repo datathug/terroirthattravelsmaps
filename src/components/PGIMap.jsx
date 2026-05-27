@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import Map from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import InfoWindow from './InfoWindow.jsx';
@@ -10,6 +10,7 @@ const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 const MAP_STYLE = 'mapbox://styles/eugenekpgimapping/cm3ag3zn701kn01qw32rnhf2d';
 const PGI_LAYER_ID = 'PGI-PDO-NoWine';
 const PGI_SOURCE_LAYER = 'pgi_pdo_Nov_5-7166c9';
+const STYLE_JSON_URL = `https://api.mapbox.com/styles/v1/${MAP_STYLE.replace('mapbox://styles/', '')}?access_token=${MAPBOX_TOKEN}`;
 
 const UNITS_OF_INTEREST = ['PDO-PT-0233', 'PGI-FR-0193', 'PGI-NL-0215'];
 
@@ -44,6 +45,26 @@ export default function PGIMap() {
   const [hoveredProps, setHoveredProps] = useState(null);
   const [cursor, setCursor] = useState('auto');
   const [searchFeatures, setSearchFeatures] = useState([]);
+  const [mapStyle, setMapStyle] = useState(null);
+
+  // Fetch the Mapbox style and inject promoteId on the PGI source so that
+  // tile-split MultiPolygons share a stable feature.id across tile boundaries
+  // (needed for whole-feature hover). promoteId is only honored at source
+  // initialization, so it has to be patched into the style before <Map> mounts.
+  // TODO perform this fix in the Mapbox studio
+  useEffect(() => {
+    fetch(STYLE_JSON_URL)
+      .then((r) => r.json())
+      .then((style) => {
+        if (style.sources?.composite) {
+          style.sources.composite.promoteId = {
+            ...(style.sources.composite.promoteId || {}),
+            [PGI_SOURCE_LAYER]: 'unit_id',
+          };
+        }
+        setMapStyle(style);
+      });
+  }, []);
 
   const onMapLoad = useCallback(() => {
     const map = mapRef.current.getMap();
@@ -172,23 +193,25 @@ export default function PGIMap() {
 
   return (
     <>
-      <Map
-        ref={mapRef}
-        mapboxAccessToken={MAPBOX_TOKEN}
-        initialViewState={{
-          longitude: 10,
-          latitude: 46,
-          zoom: 4.01,
-        }}
-        style={{ position: 'absolute', top: 0, bottom: 0, width: '100%' }}
-        mapStyle={MAP_STYLE}
-        projection="mercator"
-        interactiveLayerIds={[PGI_LAYER_ID]}
-        cursor={cursor}
-        onLoad={onMapLoad}
-        onMouseMove={onMouseMove}
-        onMouseLeave={onMouseLeave}
-      />
+      {mapStyle && (
+        <Map
+          ref={mapRef}
+          mapboxAccessToken={MAPBOX_TOKEN}
+          initialViewState={{
+            longitude: 10,
+            latitude: 46,
+            zoom: 4.01,
+          }}
+          style={{ position: 'absolute', top: 0, bottom: 0, width: '100%' }}
+          mapStyle={mapStyle}
+          projection="mercator"
+          interactiveLayerIds={[PGI_LAYER_ID]}
+          cursor={cursor}
+          onLoad={onMapLoad}
+          onMouseMove={onMouseMove}
+          onMouseLeave={onMouseLeave}
+        />
+      )}
       <div className="map-controls">
         <SearchBox features={searchFeatures} onSelect={handleFeatureSelect} />
         <CategoryFilter features={searchFeatures} onCategoryChange={handleCategorySelect} />
