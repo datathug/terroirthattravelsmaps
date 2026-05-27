@@ -117,10 +117,10 @@ export default function SearchBox({ features, onSelect }) {
           spellCheck="false"
           aria-label="Search PGI / PDO features"
           aria-autocomplete="list"
-          aria-expanded={isOpen}
         />
         {query && (
           <button
+            type="button"
             className="search-clear"
             onClick={handleClear}
             aria-label="Clear search"

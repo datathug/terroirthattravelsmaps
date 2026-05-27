@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import Map from "react-map-gl";
+import MapGL from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import CategoryFilter from "./CategoryFilter.jsx";
 import InfoWindow from "./InfoWindow.jsx";
@@ -50,7 +50,7 @@ export default function PGIMap() {
   // Fetch the Mapbox style and inject promoteId on the PGI source so that
   // tile-split MultiPolygons share a stable feature.id across tile boundaries
   // (needed for whole-feature hover). promoteId is only honored at source
-  // initialization, so it has to be patched into the style before <Map> mounts.
+  // initialization, so it has to be patched into the style before <MapGL> mounts.
   // TODO perform this fix in the Mapbox studio
   useEffect(() => {
     fetch(STYLE_JSON_URL)
@@ -206,7 +206,7 @@ export default function PGIMap() {
   return (
     <>
       {mapStyle && (
-        <Map
+        <MapGL
           ref={mapRef}
           mapboxAccessToken={MAPBOX_TOKEN}
           initialViewState={{

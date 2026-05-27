@@ -65,6 +65,7 @@ export default function CategoryFilter({ features, onCategoryChange }) {
   return (
     <div className="filter-container" ref={containerRef}>
       <button
+        type="button"
         className={`filter-button${isOpen ? " filter-button--open" : ""}${selected ? " filter-button--active" : ""}`}
         onClick={() => setIsOpen((o) => !o)}
       >
@@ -109,7 +110,11 @@ export default function CategoryFilter({ features, onCategoryChange }) {
             ))}
           </ul>
           <div className="filter-footer">
-            <button className="filter-clear-btn" onClick={handleClear}>
+            <button
+              type="button"
+              className="filter-clear-btn"
+              onClick={handleClear}
+            >
               Clear
             </button>
           </div>
