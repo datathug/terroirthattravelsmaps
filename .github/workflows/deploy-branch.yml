@@ -1,4 +1,4 @@
-name: Deploy branch to GitHub Pages
+name: deploy branch --> pages
 
 on:
   workflow_dispatch:
@@ -6,6 +6,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: github.ref_name != 'master'
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
