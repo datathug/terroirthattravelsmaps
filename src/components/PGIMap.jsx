@@ -292,7 +292,9 @@ export default function PGIMap() {
                       }
                       onClick={() => handleOverlapSelect(item)}
                     >
-                      {item.unitId}
+                      {item.properties.Name
+                        ? item.properties.Name.split("/")[0].trim()
+                        : item.unitId}
                     </li>
                   ))}
                 </ul>
