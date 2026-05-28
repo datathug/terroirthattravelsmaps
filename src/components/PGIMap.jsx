@@ -174,7 +174,9 @@ export default function PGIMap() {
           setOverlapPopup((prev) => ({
             lngLat: prev.lngLat,
             items: uniqueItems,
-            selectedUnitId: uniqueItems.some((i) => i.unitId === prev.selectedUnitId)
+            selectedUnitId: uniqueItems.some(
+              (i) => i.unitId === prev.selectedUnitId,
+            )
               ? prev.selectedUnitId
               : uniqueItems[0].unitId,
           }));
@@ -188,7 +190,11 @@ export default function PGIMap() {
       const feature = features[0];
       if (hoveredIdRef.current !== feature.id) {
         hoveredIdRef.current = feature.id;
-        map.setFilter(PGI_HOVER_LAYER_ID, ["==", ["get", "unit_id"], feature.id]);
+        map.setFilter(PGI_HOVER_LAYER_ID, [
+          "==",
+          ["get", "unit_id"],
+          feature.id,
+        ]);
         setCursor("pointer");
         // Only update the info window from mousemove when not in overlap mode;
         // overlap mode drives the info window via handleOverlapSelect instead
