@@ -42,6 +42,7 @@ export default function PGIMap() {
   const mapRef = useRef(null);
   const hoveredIdRef = useRef(null);
   const originalFilterRef = useRef(null);
+  const overlapActiveRef = useRef(false);
   const [hoveredProps, setHoveredProps] = useState(null);
   const [overlapPopup, setOverlapPopup] = useState(null);
   const [cursor, setCursor] = useState("auto");
@@ -134,30 +135,48 @@ export default function PGIMap() {
     const features = event.features;
 
     if (features && features.length > 0) {
+      // Deduplicate by unit_id, preserving first-seen properties per feature
       const seen = new Set();
-      const uniqueUnitIds = [];
+      const uniqueItems = [];
       for (const f of features) {
         const uid = f.properties?.unit_id;
         if (uid && !seen.has(uid)) {
           seen.add(uid);
-          uniqueUnitIds.push(uid);
+          uniqueItems.push({ unitId: uid, properties: f.properties });
         }
       }
-      if (uniqueUnitIds.length > 1) {
-        setOverlapPopup({ lngLat: event.lngLat, unitIds: uniqueUnitIds });
+
+      if (uniqueItems.length > 1) {
+        if (!overlapActiveRef.current) {
+          // Entering overlap: lock position, default-select first item
+          overlapActiveRef.current = true;
+          setHoveredProps(uniqueItems[0].properties);
+          setOverlapPopup({
+            lngLat: event.lngLat,
+            items: uniqueItems,
+            selectedUnitId: uniqueItems[0].unitId,
+          });
+        } else {
+          // Already in overlap: update items but keep locked position and selection
+          setOverlapPopup((prev) => ({
+            lngLat: prev.lngLat,
+            items: uniqueItems,
+            selectedUnitId: uniqueItems.some((i) => i.unitId === prev.selectedUnitId)
+              ? prev.selectedUnitId
+              : uniqueItems[0].unitId,
+          }));
+        }
       } else {
+        overlapActiveRef.current = false;
         setOverlapPopup(null);
       }
 
+      // Always track topmost feature for the outline highlight
       const feature = features[0];
       if (hoveredIdRef.current !== feature.id) {
         if (hoveredIdRef.current !== null) {
           map.setFeatureState(
-            {
-              source: "composite",
-              sourceLayer: PGI_SOURCE_LAYER,
-              id: hoveredIdRef.current,
-            },
+            { source: "composite", sourceLayer: PGI_SOURCE_LAYER, id: hoveredIdRef.current },
             { hover: false },
           );
         }
@@ -166,24 +185,32 @@ export default function PGIMap() {
           { source: "composite", sourceLayer: PGI_SOURCE_LAYER, id: feature.id },
           { hover: true },
         );
-        setHoveredProps(feature.properties);
         setCursor("pointer");
+        // Only update the info window from mousemove when not in overlap mode;
+        // overlap mode drives the info window via handleOverlapSelect instead
+        if (!overlapActiveRef.current) {
+          setHoveredProps(feature.properties);
+        }
       }
     } else {
+      overlapActiveRef.current = false;
       setOverlapPopup(null);
       if (hoveredIdRef.current !== null) {
         map.setFeatureState(
-          {
-            source: "composite",
-            sourceLayer: PGI_SOURCE_LAYER,
-            id: hoveredIdRef.current,
-          },
+          { source: "composite", sourceLayer: PGI_SOURCE_LAYER, id: hoveredIdRef.current },
           { hover: false },
         );
         hoveredIdRef.current = null;
       }
       setCursor("auto");
     }
+  }, []);
+
+  const handleOverlapSelect = useCallback((item) => {
+    setOverlapPopup((prev) =>
+      prev ? { ...prev, selectedUnitId: item.unitId } : null,
+    );
+    setHoveredProps(item.properties);
   }, []);
 
   // Called by CategoryFilter on select / clear.
@@ -204,6 +231,7 @@ export default function PGIMap() {
 
   const onMouseLeave = useCallback(() => {
     const map = mapRef.current.getMap();
+    overlapActiveRef.current = false;
     setOverlapPopup(null);
     if (hoveredIdRef.current !== null) {
       map.setFeatureState(
@@ -251,8 +279,18 @@ export default function PGIMap() {
               <div className="overlap-popup">
                 <p>Overlapping areas:</p>
                 <ul>
-                  {overlapPopup.unitIds.map((uid) => (
-                    <li key={uid}>{uid}</li>
+                  {overlapPopup.items.map((item) => (
+                    <li
+                      key={item.unitId}
+                      className={
+                        item.unitId === overlapPopup.selectedUnitId
+                          ? "overlap-item overlap-item--selected"
+                          : "overlap-item"
+                      }
+                      onClick={() => handleOverlapSelect(item)}
+                    >
+                      {item.unitId}
+                    </li>
                   ))}
                 </ul>
               </div>
