@@ -40,6 +40,10 @@ body {
 
 /* ── Overlap popup ───────────────────────────────────────── */
 
+.mapboxgl-popup-tip {
+  display: none;
+}
+
 .overlap-popup p {
   margin: 0 0 6px;
   font-size: 11px;
