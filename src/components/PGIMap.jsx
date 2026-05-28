@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import MapGL from "react-map-gl";
+import MapGL, { Popup } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import CategoryFilter from "./CategoryFilter.jsx";
 import InfoWindow from "./InfoWindow.jsx";
@@ -43,6 +43,7 @@ export default function PGIMap() {
   const hoveredIdRef = useRef(null);
   const originalFilterRef = useRef(null);
   const [hoveredProps, setHoveredProps] = useState(null);
+  const [overlapPopup, setOverlapPopup] = useState(null);
   const [cursor, setCursor] = useState("auto");
   const [searchFeatures, setSearchFeatures] = useState([]);
   const [mapStyle, setMapStyle] = useState(null);
@@ -133,10 +134,43 @@ export default function PGIMap() {
     const features = event.features;
 
     if (features && features.length > 0) {
+      const seen = new Set();
+      const uniqueUnitIds = [];
+      for (const f of features) {
+        const uid = f.properties?.unit_id;
+        if (uid && !seen.has(uid)) {
+          seen.add(uid);
+          uniqueUnitIds.push(uid);
+        }
+      }
+      if (uniqueUnitIds.length > 1) {
+        setOverlapPopup({ lngLat: event.lngLat, unitIds: uniqueUnitIds });
+      } else {
+        setOverlapPopup(null);
+      }
+
       const feature = features[0];
-
-      if (hoveredIdRef.current === feature.id) return;
-
+      if (hoveredIdRef.current !== feature.id) {
+        if (hoveredIdRef.current !== null) {
+          map.setFeatureState(
+            {
+              source: "composite",
+              sourceLayer: PGI_SOURCE_LAYER,
+              id: hoveredIdRef.current,
+            },
+            { hover: false },
+          );
+        }
+        hoveredIdRef.current = feature.id;
+        map.setFeatureState(
+          { source: "composite", sourceLayer: PGI_SOURCE_LAYER, id: feature.id },
+          { hover: true },
+        );
+        setHoveredProps(feature.properties);
+        setCursor("pointer");
+      }
+    } else {
+      setOverlapPopup(null);
       if (hoveredIdRef.current !== null) {
         map.setFeatureState(
           {
@@ -146,26 +180,8 @@ export default function PGIMap() {
           },
           { hover: false },
         );
+        hoveredIdRef.current = null;
       }
-
-      hoveredIdRef.current = feature.id;
-      map.setFeatureState(
-        { source: "composite", sourceLayer: PGI_SOURCE_LAYER, id: feature.id },
-        { hover: true },
-      );
-
-      setHoveredProps(feature.properties);
-      setCursor("pointer");
-    } else if (hoveredIdRef.current !== null) {
-      map.setFeatureState(
-        {
-          source: "composite",
-          sourceLayer: PGI_SOURCE_LAYER,
-          id: hoveredIdRef.current,
-        },
-        { hover: false },
-      );
-      hoveredIdRef.current = null;
       setCursor("auto");
     }
   }, []);
@@ -188,7 +204,7 @@ export default function PGIMap() {
 
   const onMouseLeave = useCallback(() => {
     const map = mapRef.current.getMap();
-
+    setOverlapPopup(null);
     if (hoveredIdRef.current !== null) {
       map.setFeatureState(
         {
@@ -222,7 +238,27 @@ export default function PGIMap() {
           onLoad={onMapLoad}
           onMouseMove={onMouseMove}
           onMouseLeave={onMouseLeave}
-        />
+        >
+          {overlapPopup && (
+            <Popup
+              longitude={overlapPopup.lngLat.lng}
+              latitude={overlapPopup.lngLat.lat}
+              closeButton={false}
+              closeOnClick={false}
+              anchor="top-left"
+              offset={[10, 10]}
+            >
+              <div className="overlap-popup">
+                <p>Overlapping areas:</p>
+                <ul>
+                  {overlapPopup.unitIds.map((uid) => (
+                    <li key={uid}>{uid}</li>
+                  ))}
+                </ul>
+              </div>
+            </Popup>
+          )}
+        </MapGL>
       )}
       <div className="map-controls">
         <SearchBox features={searchFeatures} onSelect={handleFeatureSelect} />
