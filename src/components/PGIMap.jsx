@@ -273,8 +273,8 @@ export default function PGIMap() {
               latitude={overlapPopup.lngLat.lat}
               closeButton={false}
               closeOnClick={false}
-              anchor="top-left"
-              offset={[10, 10]}
+              anchor="bottom-right"
+              offset={0}
             >
               <div className="overlap-popup">
                 <p>Overlapping areas:</p>
