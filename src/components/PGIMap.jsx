@@ -9,6 +9,7 @@ import "../styles/map.css";
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 const MAP_STYLE = "mapbox://styles/eugenekpgimapping/cm3ag3zn701kn01qw32rnhf2d";
 const PGI_LAYER_ID = "PGI-PDO-NoWine";
+const PGI_HOVER_LAYER_ID = "PGI-PDO-NoWine-hover";
 const PGI_SOURCE_LAYER = "pgi_pdo_Nov_5-7166c9";
 const STYLE_JSON_URL = `https://api.mapbox.com/styles/v1/${MAP_STYLE.replace("mapbox://styles/", "")}?access_token=${MAPBOX_TOKEN}`;
 
@@ -75,13 +76,25 @@ export default function PGIMap() {
     // can restore it exactly when the category filter is cleared.
     originalFilterRef.current = map.getFilter(PGI_LAYER_ID) ?? null;
 
-    // Highlight hovered feature outline in dark red
-    map.setPaintProperty(PGI_LAYER_ID, "fill-outline-color", [
-      "case",
-      ["boolean", ["feature-state", "hover"], false],
-      "#6e0707",
-      "rgba(255,255,255,0)",
-    ]);
+    // Clone layer that renders only the highlighted feature, inserted directly
+    // above the base layer so it draws on top without touching the base style
+    const layers = map.getStyle().layers;
+    const pgiIdx = layers.findIndex((l) => l.id === PGI_LAYER_ID);
+    const aboveId = layers[pgiIdx + 1]?.id;
+    map.addLayer(
+      {
+        id: PGI_HOVER_LAYER_ID,
+        type: "fill",
+        source: "composite",
+        "source-layer": PGI_SOURCE_LAYER,
+        paint: {
+          "fill-color": "rgba(255, 0, 0, 0.03)",
+          "fill-outline-color": "#6e0707",
+        },
+        filter: ["==", ["get", "unit_id"], ""],
+      },
+      aboveId,
+    );
 
     // Render units of interest on top of overlapping polygons
     map.setLayoutProperty(PGI_LAYER_ID, "fill-sort-key", [
@@ -171,20 +184,11 @@ export default function PGIMap() {
         setOverlapPopup(null);
       }
 
-      // Always track topmost feature for the outline highlight
+      // Always track topmost feature for the highlight layer
       const feature = features[0];
       if (hoveredIdRef.current !== feature.id) {
-        if (hoveredIdRef.current !== null) {
-          map.setFeatureState(
-            { source: "composite", sourceLayer: PGI_SOURCE_LAYER, id: hoveredIdRef.current },
-            { hover: false },
-          );
-        }
         hoveredIdRef.current = feature.id;
-        map.setFeatureState(
-          { source: "composite", sourceLayer: PGI_SOURCE_LAYER, id: feature.id },
-          { hover: true },
-        );
+        map.setFilter(PGI_HOVER_LAYER_ID, ["==", ["get", "unit_id"], feature.id]);
         setCursor("pointer");
         // Only update the info window from mousemove when not in overlap mode;
         // overlap mode drives the info window via handleOverlapSelect instead
@@ -196,10 +200,7 @@ export default function PGIMap() {
       overlapActiveRef.current = false;
       setOverlapPopup(null);
       if (hoveredIdRef.current !== null) {
-        map.setFeatureState(
-          { source: "composite", sourceLayer: PGI_SOURCE_LAYER, id: hoveredIdRef.current },
-          { hover: false },
-        );
+        map.setFilter(PGI_HOVER_LAYER_ID, ["==", ["get", "unit_id"], ""]);
         hoveredIdRef.current = null;
       }
       setCursor("auto");
@@ -208,17 +209,8 @@ export default function PGIMap() {
 
   const handleOverlapSelect = useCallback((item) => {
     const map = mapRef.current.getMap();
-    if (hoveredIdRef.current !== null) {
-      map.setFeatureState(
-        { source: "composite", sourceLayer: PGI_SOURCE_LAYER, id: hoveredIdRef.current },
-        { hover: false },
-      );
-    }
     hoveredIdRef.current = item.unitId;
-    map.setFeatureState(
-      { source: "composite", sourceLayer: PGI_SOURCE_LAYER, id: item.unitId },
-      { hover: true },
-    );
+    map.setFilter(PGI_HOVER_LAYER_ID, ["==", ["get", "unit_id"], item.unitId]);
     setOverlapPopup((prev) =>
       prev ? { ...prev, selectedUnitId: item.unitId } : null,
     );
@@ -246,14 +238,7 @@ export default function PGIMap() {
     overlapActiveRef.current = false;
     setOverlapPopup(null);
     if (hoveredIdRef.current !== null) {
-      map.setFeatureState(
-        {
-          source: "composite",
-          sourceLayer: PGI_SOURCE_LAYER,
-          id: hoveredIdRef.current,
-        },
-        { hover: false },
-      );
+      map.setFilter(PGI_HOVER_LAYER_ID, ["==", ["get", "unit_id"], ""]);
       hoveredIdRef.current = null;
     }
     setCursor("auto");
