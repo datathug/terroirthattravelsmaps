@@ -207,6 +207,18 @@ export default function PGIMap() {
   }, []);
 
   const handleOverlapSelect = useCallback((item) => {
+    const map = mapRef.current.getMap();
+    if (hoveredIdRef.current !== null) {
+      map.setFeatureState(
+        { source: "composite", sourceLayer: PGI_SOURCE_LAYER, id: hoveredIdRef.current },
+        { hover: false },
+      );
+    }
+    hoveredIdRef.current = item.unitId;
+    map.setFeatureState(
+      { source: "composite", sourceLayer: PGI_SOURCE_LAYER, id: item.unitId },
+      { hover: true },
+    );
     setOverlapPopup((prev) =>
       prev ? { ...prev, selectedUnitId: item.unitId } : null,
     );
