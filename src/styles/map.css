@@ -38,30 +38,6 @@ body {
   padding: 0;
 }
 
-/* ── Overlap popup ───────────────────────────────────────── */
-
-.overlap-popup p {
-  margin: 0 0 6px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #374151;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.overlap-popup ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.overlap-popup li {
-  font-family: "SF Mono", "Fira Code", ui-monospace, monospace;
-  font-size: 11.5px;
-  color: #2563eb;
-  padding: 2px 0;
-}
-
 /* ── Left-side controls wrapper ──────────────────────────── */
 
 .map-controls {
